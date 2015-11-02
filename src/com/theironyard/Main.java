@@ -5,12 +5,33 @@ import spark.Session;
 import spark.Spark;
 import spark.template.mustache.MustacheTemplateEngine;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
 
-    public static void main(String[] args) {
+    static void insertBeer(Connection conn, Beer beer) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO beers VALUES (?, ?)");
+        stmt.setString(1, beer.name);
+        stmt.setString(2, beer.type);
+        stmt.execute();
+    }
+
+    static void deleteBeer(Connection conn, int idNum) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM beers WHERE ROWNUM = ? ");
+        stmt.setInt(1, idNum);
+        stmt.execute();
+    }
+
+    //static void (Connection conn, )
+
+    public static void main(String[] args) throws SQLException {
+        Connection conn = DriverManager.getConnection("jdbc:h2:./main");
+        Statement stmt = conn.createStatement();
+        stmt.execute("CREATE TABLE IF NOT EXISTS beers (name VARCHAR, type VARCHAR)");
+
+
         ArrayList<Beer> beers = new ArrayList();
         Spark.get(
                 "/",
@@ -40,11 +61,13 @@ public class Main {
         Spark.post(
                 "/create-beer",
                 ((request, response) -> {
+
                     Beer beer = new Beer();
                     beer.id = beers.size() + 1;
                     beer.name = request.queryParams("beername");
                     beer.type = request.queryParams("beertype");
-                    beers.add(beer);
+                    insertBeer(conn, beer);
+                    //beers.add(beer);
                     response.redirect("/");
                     return "";
                 })
@@ -55,10 +78,7 @@ public class Main {
                     String id = request.queryParams("beerid");
                     try {
                         int idNum = Integer.valueOf(id);
-                        beers.remove(idNum-1);
-                        for (int i = 0; i < beers.size(); i++) {
-                            beers.get(i).id = i + 1;
-                        }
+                        deleteBeer(conn, idNum);
                     } catch (Exception e) {
 
                     }
