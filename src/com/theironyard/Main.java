@@ -24,7 +24,30 @@ public class Main {
         stmt.execute();
     }
 
-    //static void (Connection conn, )
+    static ArrayList<Beer> selectBeers(Connection conn) throws SQLException {
+        Statement stmt = conn.createStatement();
+        ResultSet results = stmt.executeQuery("SELECT * FROM beers");
+        ArrayList<Beer> beers = new ArrayList();
+        int id = 1;
+        while (results.next()){
+            String name = results.getString("name");
+            String type = results.getString("type");
+            Beer item = new Beer(name, type);
+            item.id = id;
+            beers.add(item);
+            id++;
+
+        }
+        return beers;
+    }
+
+    static void editBeer(Connection conn, int idNum, String name, String type) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("UPDATE beers SET name = ? AND type = ? WHERE ROWNUM = ?");
+        stmt.setString(1, name);
+        stmt.setString(2, type);
+        stmt.setInt(3, idNum);
+        stmt.execute();
+    }
 
     public static void main(String[] args) throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:h2:./main");
@@ -32,7 +55,6 @@ public class Main {
         stmt.execute("CREATE TABLE IF NOT EXISTS beers (name VARCHAR, type VARCHAR)");
 
 
-        ArrayList<Beer> beers = new ArrayList();
         Spark.get(
                 "/",
                 ((request, response) -> {
@@ -43,7 +65,7 @@ public class Main {
                     }
                     HashMap m = new HashMap();
                     m.put("username", username);
-                    m.put("beers", beers);
+                    m.put("beers", selectBeers(conn));
                     return new ModelAndView(m, "logged-in.html");
                 }),
                 new MustacheTemplateEngine()
@@ -61,9 +83,7 @@ public class Main {
         Spark.post(
                 "/create-beer",
                 ((request, response) -> {
-
                     Beer beer = new Beer();
-                    beer.id = beers.size() + 1;
                     beer.name = request.queryParams("beername");
                     beer.type = request.queryParams("beertype");
                     insertBeer(conn, beer);
@@ -84,6 +104,25 @@ public class Main {
                     }
                     response.redirect("/");
                     return "";
+                })
+        );
+        Spark.post(
+                "/edit-beer",
+                ((request, response) -> {
+                    String id = request.queryParams("beerid");
+                    String name = request.queryParams("beername");
+                    String type = request.queryParams("beertype");
+                    //String edit = request.queryParams("edit-beer");
+                    try {
+                        int idNum = Integer.valueOf(id);
+                        editBeer(conn, idNum, name, type);
+
+                    } catch (Exception e){
+
+                    }
+                    response.redirect("/");
+                    return ("");
+
                 })
         );
     }
