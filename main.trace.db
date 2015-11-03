@@ -1,9 +1,0 @@
-2015-11-02 16:05:11 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLException: Data conversion error converting "Ok"; SQL statement:
-UPDATE beers SET name = ? AND type = ? WHERE ROWNUM = ? [22018-190]
-2015-11-02 16:06:32 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLException: Data conversion error converting "Ok"; SQL statement:
-UPDATE beers SET name = ? AND type = ? WHERE ROWNUM = ? [22018-190]
-2015-11-02 16:08:54 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLException: Data conversion error converting "OKOK"; SQL statement:
-UPDATE beers SET name = ? AND type = ? WHERE ROWNUM = ? [22018-190]

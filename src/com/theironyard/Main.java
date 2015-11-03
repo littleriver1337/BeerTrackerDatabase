@@ -12,14 +12,14 @@ import java.util.HashMap;
 public class Main {
 
     static void insertBeer(Connection conn, Beer beer) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO beers VALUES (?, ?)");
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO beers VALUES (NULL, ?, ?)");
         stmt.setString(1, beer.name);
         stmt.setString(2, beer.type);
         stmt.execute();
     }
 
     static void deleteBeer(Connection conn, int idNum) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("DELETE FROM beers WHERE ROWNUM = ? ");
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM beers WHERE id = ? ");
         stmt.setInt(1, idNum);
         stmt.execute();
     }
@@ -28,21 +28,20 @@ public class Main {
         Statement stmt = conn.createStatement();
         ResultSet results = stmt.executeQuery("SELECT * FROM beers");
         ArrayList<Beer> beers = new ArrayList();
-        int id = 1;
         while (results.next()){
+            int id = results.getInt("id");
             String name = results.getString("name");
             String type = results.getString("type");
             Beer item = new Beer(name, type);
             item.id = id;
             beers.add(item);
-            id++;
 
         }
         return beers;
     }
 
     static void editBeer(Connection conn, int idNum, String name, String type) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("UPDATE beers SET name = ? AND type = ? WHERE ROWNUM = ?");
+        PreparedStatement stmt = conn.prepareStatement("UPDATE beers SET name = ?, type = ? WHERE id = ?");
         stmt.setString(1, name);
         stmt.setString(2, type);
         stmt.setInt(3, idNum);
@@ -52,7 +51,7 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:h2:./main");
         Statement stmt = conn.createStatement();
-        stmt.execute("CREATE TABLE IF NOT EXISTS beers (name VARCHAR, type VARCHAR)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS beers (id IDENTITY, name VARCHAR, type VARCHAR)");
 
 
         Spark.get(
