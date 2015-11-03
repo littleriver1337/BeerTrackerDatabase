@@ -112,11 +112,9 @@ public class Main {
                     String id = request.queryParams("beerid");
                     String name = request.queryParams("beername");
                     String type = request.queryParams("beertype");
-                    //String edit = request.queryParams("edit-beer");
                     try {
                         int idNum = Integer.valueOf(id);
                         editBeer(conn, idNum, name, type);
-
                     } catch (Exception e){
 
                     }
